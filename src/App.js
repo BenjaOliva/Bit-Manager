@@ -1,42 +1,32 @@
-import React from 'react';
-import {
-  ChakraProvider,
-  Box,
-  Text,
-  Link,
-  VStack,
-  Code,
-  Grid,
-  theme,
-} from '@chakra-ui/react';
-import { ColorModeSwitcher } from './ColorModeSwitcher';
-import { Logo } from './Logo';
+import React, { useEffect } from 'react';
+import { Route, Switch, Redirect, BrowserRouter } from 'react-router-dom';
+import AuthLayout from 'layouts/Auth.js';
+import AdminLayout from 'layouts/Admin.js';
+import { useDispatch } from 'react-redux';
+import { getProducts } from 'services/firebase';
 
-function App() {
+const App = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const getData = async () => {
+      const data = await getProducts();
+      return data;
+    };
+    getData()
+      .then((res) => dispatch({ type: 'END_LOADING', data: res }))
+      .then((res) => console.log(res));
+  }, []);
+
   return (
-    <ChakraProvider theme={theme}>
-      <Box textAlign="center" fontSize="xl">
-        <Grid minH="100vh" p={3}>
-          <ColorModeSwitcher justifySelf="flex-end" />
-          <VStack spacing={8}>
-            <Logo h="40vmin" pointerEvents="none" />
-            <Text>
-              Edit <Code fontSize="xl">src/App.js</Code> and save to reload.
-            </Text>
-            <Link
-              color="teal.500"
-              href="https://chakra-ui.com"
-              fontSize="2xl"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learn Chakra
-            </Link>
-          </VStack>
-        </Grid>
-      </Box>
-    </ChakraProvider>
+    <BrowserRouter>
+      <Switch>
+        <Route path={`/admin`} component={AdminLayout} />
+        <Route path={`/auth`} component={AuthLayout} />
+        <Redirect from="*" to={'/auth'} />
+      </Switch>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;
